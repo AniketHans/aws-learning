@@ -58,3 +58,75 @@
    5. Some use cases are, if we have a domain `www.abc.com`. If the request comes to `www.abc.com` then we can reroute this to our front application servers/EC2 instances and if the request comes to `www.abc.com/api/` then we can reroute the request to our backend servers/EC2 instances.
    6. Similary, we can use query parameters in the request to decide the target Ec2 instances.
    7. We have the property called Group level Stickiness, which is disabled by default. Suppose I have 2 Ec2 instances (E1 and E2) under the target group. Let a client send requests, then my ALB can either send the request to E1 or E2 based on the load. Now, if the same client again requests, then again my ALB can send request to either of E1 and E2 if the Group level Stickiness is disabled. But if Group level Stickiness is enabled, then ALb will direct all the requests from same client to same EC2 instance either E1 or E2 each time. This scenerio is useful in case of stateful services where the state of the client is saved.
+   8. The stickiness can be achieved by using cookies. We can use Load Balancer generated cookies as well. In this case, in request headers, you will see the aws load balancer generated cookie being attached to identify the request.
+   9. Cross Zone load balancing is enabled by default in ALB. It means, if we have multiple EC2 instances from different availability zones attached to a load balancer, then the load will be distributed evently amoung all the EC2 instances irrecpective of the availability zone.
+   10. If Cross zone load balancing is disabled, then the traffic will only be distributed amoung the EC2 instances that are in same availability zone as that of the load balancer.
+9. Network Load Balancer (NLB)
+   1. It works on the transport layer.
+   2. It mainly has info about the source and destination IP address along the ports. Network load balancer does not have info about the data that is being communicated between source and destination.
+   3. As NLB does not involve processing of data so it is faster than ALB.
+   4. Here, the target groups are also created. We divide the target groups based on the protocol and port of the application. It means instances belonging to a target grp can be used to serve the application at port say 4569 and other EC2 instances belonging to the another target grp can can be used to server another application at port say 6708
+   5. Cross zone load balancing is disabled in NLB
+
+### ASG
+
+1. It stands for Auto Scaling Group
+2. Auto scaling is used when the actual traffic on the instances is very different from the predicted traffic. Either, the traffic is very huge and our current number of instances are not able to handle them or the traffic is very less and we have some extra instances running.
+3. We can have 2 types of scaling:
+   1. Vertical scaling
+      1. Here, the size of the instance is increased to incorporate the increased demand
+      2. If you are using a paid operating system, then its better to go with vertical scaling.
+      3. If you have database running on the instance, then go with vertical scaling.
+   2. Horizontal scaling
+      1. Here, the number of instances under the load balancer are increased.
+4. You can create a launch template for your EC2 instance. A launch template is a blueprint with some configurations that can be used to create EC2 instances with the given config. All the EC2 instances created from the template are identical.
+5. We set the desired, minimum and maximum number of instances needed in the ASG. ASG will act as an orchestrator and will maintain the desired instances in the system and as soon as the traffic increases, it starts increasing the number of instances.
+6. As soon as the ASG is deleted, the instances created by the ASG will also gets deleted from the system.
+7. We can have the following types of scaling:
+   1. Scheduled actions
+      1. This is used when you know the events in the future where the load will be high and more instances will be needed.
+      2. The event can be on specific date and time or periodic as well.
+   2. Predictive actions
+      1. This can be used with aws' predictive algo where through the past data, aws analys when and how many new instances will be required to meet the potential demand.
+   3. Dynamic actions
+      1. It has the follwoing scaling policies:
+         1. Simple scaling:-
+            1. Here, we need to create a cloudwatch alarm for anything like CPU utilization etc. When the alarm is triggered, based on the config new instance will gets created
+            2. We can either increase or decrease the number of instances
+         2. Step scaling
+            1. It is similar to Simple scaling except here we can config increasing and decreasing of instances based on multiple cloudwatch alarms
+         3. Target Tracking scaling
+            1. Here, we dont need to create cloudwatch alarm manually. It also uses the cloudwatch at the backend but we only need to provide the condidtion which will trigged the scaling on instances like say, when average CPU utlization of all the instances becomes more than 50% then start creating new instances
+8. When you create the ASG for a load balancer, it asks for info about existing target grp or creating target grp. After this, the addition or removing of scaled instances into the target group will be taken care by the AWS itself.
+
+### IAM
+
+1. Identity Access Management
+2. IAM is a global service. It means its config will remain available in all the avalibility zones.
+3. It is used to give specific roles and permission to users. We grant some aws services permissions to the user so that the user can perform some actions on them only.
+4. We attach policies to the users. A policy is a document in which the aws services and their permissions are written.
+5. We can create groups with some policies attached to it. Later, we can add/remove users from it.
+6. Suppose, there are 2 policies:- S3 full access and S3 no access. Both of these are attached to a user. Then, the user will not be able to access the S3. In AWS Identity and Access Management (IAM), when a user is associated with multiple groups, the permissions are cumulative. This means that if you attach a user to two groups—one with permissions to read and write in Amazon S3, and another with explicit denials to read and write in S3—the user will ultimately be denied those permissions. In IAM, explicit denials take precedence over permissions granted. This is known as the "deny overrides" principle. So, if any group the user belongs to denies a certain permission, even if the other groups grant that permission, the denial will take precedence and the user will be denied access. In your scenario:
+   1. Group 1 grants read and write permissions to S3.
+   2. Group 2 denies read and write permissions to S3.
+      If you attach both groups to a user, the user will not have permissions to read and write in S3. The explicit denial from Group 2 will override the permissions from Group 1. So, the user will essentially have the least permissive set of permissions across all the groups they are associated with. In this case, the user would not be able to perform any S3 actions due to the explicit denial in Group 2.
+7. If you copy policies from a user to another. Then, if the source user is a member of a group and you copy its permissions to the other user, then the other user will also become the member of the group that the source user is.
+8. Roles in AWS:
+   1. Roles are attached to an AWS resource.
+   2. The role can give access to an aws resource to access another aws resource mentioned in the role policy.
+   3. Like, we can create a role with a policy to access the S3 and assign that role to EC2 instance or lambda. Thus, now we can access the S3 from our EC2 instances or lambda.
+   4. Similary, we can assign the role to access the secrets manager to our lambdas.
+9. Cloudshell
+   1. It is an AWS cli that can be accessed on the web from the aws account.
+   2. The account through which the cloudshell is accessed will already be configured in the cloushell
+10. Thus, we can access the AWS services through 3 ways:
+    1. Configure the aws cli in our local system
+       1. Install aws cli from web
+       2. In terminal, run `aws configure --profile <name>`
+       3. This will ask for your secrets
+       4. then using, `aws help` you can further access the aws services like S3, ec2 etc
+    2. Providing specific service role to EC2 and lambda
+       1. The role can be assigned to EC2 instance and then the aws services can be accessed by installing the aws cli in the ec2 instance
+       2. We dont have to configure the credential as the role is assigned to the Ec2 instance
+    3. Using Cloudshell
+       1. We dont need to install anything as this can be accessed from the aws console.
