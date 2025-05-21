@@ -130,3 +130,48 @@
        2. We dont have to configure the credential as the role is assigned to the Ec2 instance
     3. Using Cloudshell
        1. We dont need to install anything as this can be accessed from the aws console.
+
+### S3
+
+1. S3 stands for Simple Storage Service
+2. Here, we can storage our data.
+3. This is an aws core service.
+4. The bucket can be created in a region. The bucket name should be unique across all the buckets present in aws.
+5. The files uploaded in S3 bucket are refered to as objects.
+6. S3 bucket dont support creating folders. Suppose you created a folder, with name f1, and added a file file1.txt in it. Then, the folder names will only be added as prefix to the file name and hence the final name will be f1/file1.txt Here, `f1/` is the prefix for file `file1.txt`
+7. Versioning can be enabled to prevent losing of an object if it is overridden by another object with the same name. If versioning is enabled on the bucket and some object is deleted by mistake then you can retrieve it by foloowing steps:
+   1. First enable the show versions toggle
+   2. The deleted file will have a type as `Delete marker`
+   3. Delete this file with type `Delete marker` and your mistakenly deleted file will be retrieved.
+8. If you have enabled versioning for a bucket then you can't disable it. you can only suspend the versioning. It means the files, which were uploaded when the versioning was enabled, will still show versions after the versioning suspension. But the newly uploaded files will not have any versions.
+9. You can use S3 to serve static pages of your website. It means the pages will not have any api calls etc, just a file containing html, css and js. You need to enable the static website hosting setting in the S3 bucket.
+10. We need to make both the bucket and the objects in the bucket public for them to be accessed publically.
+11. In case of static hosting, we can redirect one bucket to another. It means suppose we have redirection from bucketA to bucketB with both having static website hosting enabled, then if we try to access the bucketA through its hostname, it will redirect us to the bucketB's hostname.
+12. We can set redirection rules as well in static website hosting buckets.
+13. S3 Accelaration
+    1. Suppose you have a bucket in aws virginia region and you live in India, you want to upload some files to your bucket.
+    2. Normally, it will take a lot of time as you will have to upload you file directly to the bucket which is very far from your location
+    3. S3 accelaration can be enabled to cut short the time taken to upload the file.
+    4. In aws, we have lots of edge locations like mumbai, hyderabad, delhi etc in ap-south-1.
+    5. In S3 accelaration, say you are in India, what we do is we upload the file to our nearest edge location and then aws itself will transfer it, using its own network, to your bucket in virginia. AWS is smart enough to know if direct uploading will be faster or accelarated uploading and uses the faster one.
+14. Same Region Replication (SRR) and Cross Region Replication(CRR)
+    1. The objects in a bucket are copied to mutiple availability zones by default for fault tolerance
+    2. When the object is copied in the same region, we call it SRR
+    3. When the object is copied in multiple regions, we call it CRR
+    4. You need to set the replication rules in a bucket, where you will be defining the source and the destination bucket. The destination bucket will be the one where the backup of the source bucket will be kept. The dest bucket may be in same region or other.
+    5. Note, the replication will not replicate the delete marker until explicitly checked.
+15. S3 storage classes
+    1. We have multiple storage classes based on the frequency of object retrieval, availability of object.
+    2. We can select the storage classes only at the object level not at the bucket level. It means while uploading the object in S3 we can select what storage class like standard, glacier etc the object belongs. The storage class then will decide the fequency, speed etc of the object retrieval.
+16. S3 lifecycle management
+    1. We can define the lifecyle of an object present in our bucket using the lifecyle rules.
+    2. It means suppose an object is there which belongs to the S3 standard storage class. Now, you want the object to move to S3 Glacier storage class after some time, say 30 days and after 90 days you want to delete the object. You can do all this my setting up the lifecycle rules in bucket.
+17. CORS:
+    1. Suppose, you have a website www.web1.com and you have some images, html files etc stored in S3 bucket.
+    2. Now, you want to use the resources of S3 bucket into your website. But as you can see the origin of your website will be www.web1.com and the origin of S3 will be, lets say, s3:youbucket.aws.com.
+    3. Now since the origin of both the things are different, you cant use the resources of s3 directly into the web1.com.
+    4. For this to work, you need to enable CORS and whitelist the web1.com url in your S3 config so that the web1.com can access the content of S3 bucket.
+    5. Note, the CORS by default blocks the external websites to access your website's data, means only the requests from same domain will be catered and rest will be denied.
+    6. In case of S3 say there are 2 buckets, bucket1 and bucket2. Both the buckets have static website hosting enabled. Now, say you have your index.html file present in bucket1 and the other file say content.html in bucket2. Suppose, in the index.html, we are trying to access the content.html using jquery.
+    7. Now, since the CORS policy is not set by default so you are going to get CORS error. For, bucket1 to content of bucket2, you need to enable/whitelist the bucket1 in bucket2's CORS policy.
+18.
