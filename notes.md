@@ -195,3 +195,21 @@
 7. Even if the server is sending the data (large data) in multiple packages/chunks, the cloudfront will send them to the user as soon as it recieves them so that the latency can be reduced. Thus, cloudfront is good for streaming purpose as well.
 8. Once you setup a cloudfront configuration, it will be deployed at all the aws edge locations.
 9. Also, while creating the cloudfront config, you can add a custom header to the request going from cloudfront to your server. It means the client will request for webpage/file to the nearest cloudfront and then the cloudfront will add that custom header in the request and send it to the server. The custom header can be checked at the server to know if the request is comming from the cloudfront or not by cross checking the custom header that you added. This can be used to filter out the request comming from cloudfront.
+10. If you have updated the webpage at your server but your cloudfront is still showing old webpage then you can create cloudfront invalidations and invalidate the data for the path you want. Next time you fetch the webpage, it will be an updated one.
+11. Enabling only cloudfront to access your Load Balancer or EC2 instance:
+    1. If you want nobody except the cloudfront to access your Load balancer and EC2 instance then you can do this by enabling the IPs that are allocated to cloudfront only in the load balancer/EC2 instance's security group.
+    2. AWS maintains some list of IPs itself like the list of IPs of cloudfront
+    3. You can get the cloudfront list by Going to `VPC ---> Managed Prefix lists ---> amazon global cloudfront list`
+    4. Copy the id of the cloudfront list
+    5. Now, add the id to the source http and https in the security group of the load balancer or EC2 instance
+    6. After this, the load balancer or EC2 instance will only get hit from cloudfront.
+12. You can also access a private S3 bucket's object using cloudfront. All you need is to create a cloudfront distribution for that S3 bucket and change policy of the S3 bucket to enable cloudfront to access the objects of the bucket.
+13. Cloudfront path based routing
+    1. Suppose you have a requirement to create a cloudfront distribution where if /images path is hit, we need to get retreive data from S3 and if /web is hit, we need to access our EC2 instance.
+    2. You can do this my adding multiple cloudfront origins with the paths mentioned above.
+    3. At the time of creation of cloudfront distribution, you can only add one origin. But after its deployment, you can add multiple origins like S3, EC2 etc.
+    4. After this, go to behaviours in that cloudfront distribution, add the path and the origin you want to call for that path.
+    5. This will make the desired changes.
+14. You can also set a custom error page for different error codes like 404, 500 etc.
+15. You can also put geographic restrictions like allowing or blocking access to the cloudfront from any number of countries.
+16. Note: any changes to the cloudfront config will be deployed to all the edge locations so things might take time to deploy.
