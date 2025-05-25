@@ -174,4 +174,24 @@
     5. Note, the CORS by default blocks the external websites to access your website's data, means only the requests from same domain will be catered and rest will be denied.
     6. In case of S3 say there are 2 buckets, bucket1 and bucket2. Both the buckets have static website hosting enabled. Now, say you have your index.html file present in bucket1 and the other file say content.html in bucket2. Suppose, in the index.html, we are trying to access the content.html using jquery.
     7. Now, since the CORS policy is not set by default so you are going to get CORS error. For, bucket1 to content of bucket2, you need to enable/whitelist the bucket1 in bucket2's CORS policy.
-18.
+18. Presigned URLs
+    1. Suppose you have a S3 object which you want to share with someone outside your org. You can't make the object public as that can make the object accessible to anybody.
+    2. Presigned urls are urls which allow someone to access any object for a duration of time and after that the url will get expired and no one will be able to access the object with that url.
+    3. In AWS, select the object and go to object actions. After that select generate presigned url with a time limit.
+    4. This helps in sharing object with external people without making it public.
+19. S3 encryption
+    1. You can encrypt the bucket objects either at the client side (at the application level, before storing to S3) or at the server side (means at the AWS side)
+    2. For server side encryption, you can use either S3 managed encryption key or key from Aws Key Managment Service.
+    3. You can have a particular encryption mechanism at the bucket level. Also, you can override the bucket level encrytion mechanism for any object with a different encryption mechanism.
+
+### Cloudfront
+
+1. Suppose you have a server in US and you are in India, say Moradabad. Now, you want to access a webpage hosted on the server. Now, ideally you should directly request the US server and fetch the webpage. But since the distance between the client and the server is too large, then the request will take some time to fulfill.
+2. As we know, there are many aws edge location. Now, suppose there is a edge location with aws servers in Delhi, India and I am in Moradabad. Now, if I want to request a webpage from US server, I will make a request to my nearest edge location i.e Delhi. The request will reach the Delhi servers and then AWS will use its own network to communicate the Delhi location to the US location for the requested webpage. Since, AWS is using its own network, the request turnaround time will be very less. Then, after retrieving the webpage in Delhi location, AWS will send the page to client and also keep a copy of the webpage for itself in case of another request for the same page. The webpage will be stored in AWS cloudfront.
+3. Cloudfront is like a cache which can store webpages, files etc. at a edge location
+4. Cloudfront can store dynmic as well as static content.
+5. Cloudfront keeps sending the response back to the client as soon as it starting getting response from the server. It means if a file is requested by user which is very large in size, Cloudfront will keep sending the file to the user for download as soon as the first bit of the file is recieved at the cloudfront(at the edge location) from server.
+6. Thus, cloudfront can be used for streaming as well because the client will request for the data to an edge location, rest is taken care by the AWS network to ask for the data from far server and then sending the data back to client as soon as it is recieved at the edge location.
+7. Even if the server is sending the data (large data) in multiple packages/chunks, the cloudfront will send them to the user as soon as it recieves them so that the latency can be reduced. Thus, cloudfront is good for streaming purpose as well.
+8. Once you setup a cloudfront configuration, it will be deployed at all the aws edge locations.
+9. Also, while creating the cloudfront config, you can add a custom header to the request going from cloudfront to your server. It means the client will request for webpage/file to the nearest cloudfront and then the cloudfront will add that custom header in the request and send it to the server. The custom header can be checked at the server to know if the request is comming from the cloudfront or not by cross checking the custom header that you added. This can be used to filter out the request comming from cloudfront.
