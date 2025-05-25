@@ -213,3 +213,14 @@
 14. You can also set a custom error page for different error codes like 404, 500 etc.
 15. You can also put geographic restrictions like allowing or blocking access to the cloudfront from any number of countries.
 16. Note: any changes to the cloudfront config will be deployed to all the edge locations so things might take time to deploy.
+17. Usages of cloudfront
+    1. You can only allow request from cloudfront to call apis by adding custom header to the req and then checking that req header in a middleware.
+    2. You can also set the TTL for api response in cloudfront by adding `cache-control` response header from the server in the response.
+    3. Suppose, you have the following 2 urls hit one after the other:
+       1. `cloudfront-url.aws.com/user?page=1&size=5`
+       2. `cloudfront-url.aws.com/user?page=2&size=6`
+       3. It means we have query params along with path.
+       4. Cloundfront is a cache and by default it puts only the path as key and the response as value. It means it does not take the query params into the consideration of key.
+       5. Thus, both the above mentioned urls will return the same response as the path is same. The first one will be a cache miss and other one will be a cache hit. This is because the query params in not taken into consideration in the cache key hence both the requests will be considered as same.
+       6. We can enable the query params consideration by enabling Query strings setting in cache policy. After this, the query params will also be considered in the cache key and hence the response will be different for the above requests
+       7. Similary, we can enable header and cookies as the part of the key in cache. This can be helpful for authorized users.
