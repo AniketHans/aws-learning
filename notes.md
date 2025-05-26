@@ -224,3 +224,27 @@
        5. Thus, both the above mentioned urls will return the same response as the path is same. The first one will be a cache miss and other one will be a cache hit. This is because the query params in not taken into consideration in the cache key hence both the requests will be considered as same.
        6. We can enable the query params consideration by enabling Query strings setting in cache policy. After this, the query params will also be considered in the cache key and hence the response will be different for the above requests
        7. Similary, we can enable header and cookies as the part of the key in cache. This can be helpful for authorized users.
+
+### Amazon VPC
+
+1. VPC stands for Virtual Private Cloud. This is AWS' networking service
+2. All the services that you deploy need to communicate with each other thus there is need for networking
+3. VPC has the scope in a region only.
+4. Creating a VPC
+   1. We need to provide range of private IPs that will be used in the VPC
+   2. The network created using VPC is a private network so private IPs are needed. You can search on the internet about private IP range
+   3. You need to provide the IPv4 CIDR. Now, suppose you have chosen the private network intial IP as 192.168.0.0 , now you thought you are going to have not more that 2^16 servers for your services. Then what you can do is you can put the 192.168 as static prefix for the server IPs and have the variable IP from 0.0 to 255.255, Hence the full range of IPs for your servers will be 192.168.0.0 to 192.168.255.255. Since the first 16 bits of your private IPs will be static so the CIDR for you VPC will be `192.168.0.0/16`
+   4. Here above the network id will be 192.168 since this is static
+   5. The created VPC will be available in all the availability zones under the region
+5. Subnets
+   1. We can divide the bigger network, where devices can have IPs ranging from 192.168.0.0 to 192.168.255.255, into smaller subnetworks or subnets.
+   2. In a college, we have multiple networks may be divided based on departments. Although, the college will have a VPC but there can be multiple subnets for multiple departments.
+   3. Devices connected to a subnet can communicate with each other seemlessly
+   4. Now, suppose we want to create 4 subnets from the above VPC and lets have their IP ranges as follows:
+      1. Subnet 1: 192.168.1.0 - 192.168.1.255, thus IPv4 CIDR will be 192.168.1.0/24 since first 24 bits are static for the subnet
+      2. Subnet 2: 192.168.2.0 - 192.168.2.255, thus IPv4 CIDR will be 192.168.2.0/24 since first 24 bits are static for the subnet
+      3. Subnet 3: 192.168.3.0 - 192.168.3.255, thus IPv4 CIDR will be 192.168.3.0/24 since first 24 bits are static for the subnet
+      4. Subnet 4: 192.168.4.0 - 192.168.4.255, thus IPv4 CIDR will be 192.168.4.0/24 since first 24 bits are static for the subnet
+   5. Subnet's scope is in a availability zone only
+6. Note: Whenever we create a security group, we select a VPC. Now if we create another VPC and use it for our instances, we will not get that security group as option while attaching it to the EC2 instance because the security group is attached to some other VPC.
+7.
