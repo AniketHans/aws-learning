@@ -291,3 +291,20 @@
     1. SGs are stateful and NACL is stateless means we only config inbound rules in security groups and aws automatically config the outbound rules but in NACL, we need to config both.
     2. SG is at instance level and NACL is at the subnet level
     3. We can only config allow in SG while in NACL, we can config both Allow and Deny
+23. VPC Peering
+    1. Suppose there are 2 instances I1 and I2 in different VPCs, say VPC1 and VPC2. Both I1 and I2 are in public subnet.
+    2. If we want these instances to connect with each other, we can do this by using their public IPs not private IPs
+    3. VPC peering can be used to connect instances using their private IPs. The instances can be in:
+       1. 2 different VPCs
+       2. 2 different regions
+       3. 2 different AWS accounts
+    4. Note: while creating the VPC peering connections for 2 VPCs, the private IP CIDRs of both the VPCs should not overlap.
+    5. After creating the VPC peering connection, you need to add the CIDR's of both VPCs into each others route tables with target as the created peering connections
+24. Transit Gateway
+    1. Suppose you have multiple VPCs and you want to connect them all, means the instances in all the VPCs will be able to communicate with each other using private IPs
+    2. AWS transit gateway is a aws service which can connect to multiple VPCs like star topology. All the VPC connected to the transit gateway will allow all the instances created in them to communicate with each other.
+    3. You can also communicate your data centers, using Site to Site VPN, with Transit gateway.
+    4. First you need to create a transit gateway.
+    5. Then, you need to create transit gateway attachments for each VPC you want to connect to the transit gateway.
+    6. After this, a new route table will be attached to the transit gateway stating the source IP CIDRs and the destination as the respective VPCs
+    7. Now, you have to go to the route table of all the VPCs, that are connected to the transit gateway, and add the CIDR's of other VPCs as source and the transit gateway attachment as the target. So, any traffic for the private IP range in the CIDRs will be routed to transit gateway and then it will be routed to the destination VPC
