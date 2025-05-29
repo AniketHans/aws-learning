@@ -308,3 +308,25 @@
     5. Then, you need to create transit gateway attachments for each VPC you want to connect to the transit gateway.
     6. After this, a new route table will be attached to the transit gateway stating the source IP CIDRs and the destination as the respective VPCs
     7. Now, you have to go to the route table of all the VPCs, that are connected to the transit gateway, and add the CIDR's of other VPCs as source and the transit gateway attachment as the target. So, any traffic for the private IP range in the CIDRs will be routed to transit gateway and then it will be routed to the destination VPC
+25. VPC Endpoint
+    1. Suppose, there are 2 persons, P1 and P2, sitting beside each other and connected to same router, Rtr
+    2. Let say, P1 sends a whatsapp message to P2. The message flow will look like:
+       1. `P1 --> Rtr --> Whatsapp server --> Rtr --> P2`
+       2. Here, even tough both P1 and P2 are sitting besides each other still the message has to go the outerworld through the internet and then gets tranfered to the destination
+    3. Similarly, when you have your application server running and the application uploads some files on S3 then this task has to be performed through public network although both the services, application server and S3, are in AWS infra.
+    4. Thus, for private communication between different aws services, we use VPC endpoints so we dont have to go through public channels for communication.
+    5. You need to create a vpc endpoint with S3 as the aws service and your instance's VPC. The services can have 2 types Gateway and Interface.
+    6. In Gateway type, the route table attached to your VPC will get modified. A Prefix list, containing the IPs of all the S3 servers, will be added as destination and a VPC will be added as target. Thus, any request, the application server makes, trying to access the S3 server will be routed to the target VPC where the required S3 bucket can be accessed. The target VPC will have all the S3 buckets under it.
+    7. In interface, the settings will be attached to subnet. An interface will gets attached to a security group in this case. That network will be used for private communication between aws services. This is a more costly approach as the data transfer cost through the interface has to be paid.
+26. AWS Site to Site VPN
+    1. VPN creates a tunnel between the client and the server the user wants to access. No thrid party can check the packets that the client and server are exchanging between them.
+    2. Some orgs put their application servers etc on AWS and they put their data centers on Premise may be due to trust issues.
+    3. Now, if they want their application servers to communicate with their data centers, they want to do it through secured network, say VPN.
+    4. What happens is the client installs a client gateway (VPN server) on its premise and at aws side, install VGW (Virtual Gateway) on the VPC or transit gateway (connected to multiple VPCs). The VGW and Client gateway will communicate with each other.  
+       ![VGW and Client gateway](./resources/images/VGW.png)
+    5. VGW saves us from installing VPN client on each EC2 instance.
+    6. The route table will be updated as such the traffic whose destination IPs CIDR matches the one present in data center. Then the traffic will be routed to VGW which will forward that to the client gateway securely. Thus, your data centers will be able to communicate with your aws infra.
+27. Egress only internet gateway
+    1. This is similar to NAT gateway.
+    2. But this only supports IPv6
+    3. Thus, if you want to communicate using IPv4 then use NAT gateway and for IPv6 use Egress only
