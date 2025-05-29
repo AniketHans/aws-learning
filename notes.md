@@ -319,7 +319,7 @@
     6. In Gateway type, the route table attached to your VPC will get modified. A Prefix list, containing the IPs of all the S3 servers, will be added as destination and a VPC will be added as target. Thus, any request, the application server makes, trying to access the S3 server will be routed to the target VPC where the required S3 bucket can be accessed. The target VPC will have all the S3 buckets under it.
     7. In interface, the settings will be attached to subnet. An interface will gets attached to a security group in this case. That network will be used for private communication between aws services. This is a more costly approach as the data transfer cost through the interface has to be paid.
 26. AWS Site to Site VPN
-    1. VPN creates a tunnel between the client and the server the user wants to access. No thrid party can check the packets that the client and server are exchanging between them.
+    1. VPN creates a tunnel between the client and the server. No thrid party can check the packets that the client and server are exchanging between them.
     2. Some orgs put their application servers etc on AWS and they put their data centers on Premise may be due to trust issues.
     3. Now, if they want their application servers to communicate with their data centers, they want to do it through secured network, say VPN.
     4. What happens is the client installs a client gateway (VPN server) on its premise and at aws side, install VGW (Virtual Gateway) on the VPC or transit gateway (connected to multiple VPCs). The VGW and Client gateway will communicate with each other.  
