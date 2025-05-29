@@ -325,7 +325,7 @@
     4. What happens is the client installs a client gateway (VPN server) on its premise and at aws side, install VGW (Virtual Gateway) on the VPC or transit gateway (connected to multiple VPCs). The VGW and Client gateway will communicate with each other.  
        ![VGW and Client gateway](./resources/images/VGW.png)
     5. VGW saves us from installing VPN client on each EC2 instance.
-    6. The route table will be updated as such the traffic whose destination IPs CIDR matches the one present in data center. Then the traffic will be routed to VGW which will forward that to the client gateway securely. Thus, your data centers will be able to communicate with your aws infra.
+    6. The route table will be updated as such the traffic whose destination IPs CIDR matches the one present in data center that traffic will be routed to VGW which will forward that to the client gateway securely. Thus, your data centers will be able to communicate with your aws infra.
 27. Egress only internet gateway
     1. This is similar to NAT gateway.
     2. But this only supports IPv6
