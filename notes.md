@@ -264,3 +264,30 @@
 17. You can also put your application server in private subnet and to access the application, you can create a proxy server in the public subnet. So the user will only be able to request your proxy and then the proxy will forward the request to application server as both belong to the same VPC.
 18. Suppose, you have 2 subnets, S1-public and S2-private which are public and private respectively. Now, say you have 2 instances I1 and I2 connected to S1-public and S2-private respectively. If you try to ssh the I1, you will be able to do it since the I1 has the internet access and if you try to ssh the I2, you will not be able to do it as it does not have internet access. Now, you want to install something in the I2 using terminal but from your system you wont be able to do it. So what you can do is, first ssh into I1 and from I1, ssh into I2. I1 and I2 will be able to communicate with each other as both of them belong to the same VPC. After that, you will be able to install things in I2. Here, I1 acted as a `jump server` as it is here used to access the I2.
 19. Note: Even after ssh to I2 from I1, you wont be able to access internet through I2 as it is part of private subnet and does not have access to internet.
+20. To provide the internet access to I2, we can use the following methods
+    1. Using NAT (Network Access Translation)
+       1. We have multiple devices connected to our router. In this case, the router will have a public IP and all the devices connected to it will get private IPs.
+       2. Whenever the connected device need to access the internet, it will use the router's public IP. The reponse will be returned to router and then the router will send the response to the private IP of the requesting device.
+       3. Thus, to provide internet access to I2, we will create a special NAT instance. The private I2 will use the NAT instance to access the internet. This nat EC2 instance will be created using a NAT AMI. Also, this instance will be created in same VPC and public subnet.
+       4. We need to attach an elastic IP to the NAT instance
+       5. After this, we need to go the routing table of private subnet and attach the destination `0.0.0.0/0` to the NAT EC2 instance target. This will forward all the traffic, that does not fit the 192.168.0.0/16 CIDR, to the NAT EC2 instance.
+       6. Also, suppose the I2 has a public IP of 1.2.3.4 and the NAT instances elastic public IP is 5.6.7.8. Now, after following the above steps, I2 requests for google.com and this will be forwarded to the NAT instance and it will forward it to the google.com. Since, the request is comming from IP 1.2.3.4 and the response will also be sent back to 1.2.3.4. But here, since the request was forwarded by NAT instance with IP 5.6.7.8, so it will decline the reposne comming from google.com saying the response is for IP 1.2.3.4 but my IP is 5.6.7.8.
+       7. To solve this, we need to go to the NAT EC2 instance, then `networking --> Change source/destination check --> Stop it`. This will prevent the NAT instance to check if the incomming traffic is for its IP or not. It will just accept it.
+       8. After all this, finally, your instance I2, part of the private subnet, will get the internet access.
+       9. This method is generally not recommended as we have to maintain the NAT instance and also it will act as a single point of failure.
+    2. NAT gateway
+       1. This is a aws managed service.
+       2. You can create a NAT gateway in the VPC of I2 and public subnet.
+       3. Again, attach the NAT gateway to the routing table of private subnet againt the 0.0.0.0/0 source.
+       4. After, this your private instance will get the internet access
+21. NACL
+    1. It stands for Network Access Control List
+    2. `End user request --> NACL firewall --> Security Group --> Server EC2 instances`
+    3. The NACL is the first firewall the request encounters then its the security group and then it will hit the servers
+    4. Now, if we want to deny some IPs to make request, we can't do it in security group as it only has the allow mechanism. We can do this denial in NACL.
+    5. Each VPC has a NACL attached to it, we can configure that.
+    6. In each NACL, we have rule numbers. Lower the rule number, Higher the priority. Thus, all the denial rules should have low rule numbers to prioritize them first.
+22. Security group vs NACL:
+    1. SGs are stateful and NACL is stateless means we only config inbound rules in security groups and aws automatically config the outbound rules but in NACL, we need to config both.
+    2. SG is at instance level and NACL is at the subnet level
+    3. We can only config allow in SG while in NACL, we can config both Allow and Deny
