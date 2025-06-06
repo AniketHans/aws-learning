@@ -330,3 +330,47 @@
     1. This is similar to NAT gateway.
     2. But this only supports IPv6
     3. Thus, if you want to communicate using IPv4 then use NAT gateway and for IPv6 use Egress only
+
+### Route 53
+
+1. This is a fully managed DNS service
+2. Top Level Domains (TLDs) are .com, .in, .com.au etc
+3. Route 53 is a domain registrar as well means you can buy domain from here as well.
+4. Registering the domain:
+   1. You need to go to register domain in aws and find which domain is available.
+   2. After successful payment, you can see you domain and a hosted zone
+5. Hosted Zone:
+   1. After buying the domain name, we need to configure it so that people hitting the domain land on the desired website. All the configurations needs to be done in hosted zone.
+   2. One hosted zone is created by default after buying the domain.
+   3. If you create new hosted zones then you have to pay for it
+   4. In a hosted zone, you will have 2 records created by default
+      1. SOA record
+         1. It stands for Start Of Authority. It contains all the info about your domain.
+      2. NS record
+         1. It stands for Name Server
+         2. Any DNS request follows this path before getting resolved `Root level server --> TLD server --> Name server`
+         3. Name Server aka Authoritive Name Server knows the server IP where the request needs to go.
+         4. The name server has all the info related to the domain name
+         5. Route 53 provides you 4 name servers by default for fault tolerance
+   5. Creating records
+      1. Records can be of different types. Some of them are as follows
+         1. A record
+            1. It tells the IPv4 address where the request will go which came at your domain
+         2. AAAA record
+            1. It is similar to A record but it deals which IPv6
+         3. CNAME record
+            1. It is used to redirect traffic comming to your domain to another url. For example, if you create a load balancer, you dont get any IP address. Load balancer gives you a url. Thus, if you want to route the request to load balancer, you can create a CNAME record.
+         4. MX record
+            1. It tells if any mail comes to the domain then the exchange host or mail server, where the mail will be routed, will be configured here.
+         5. TXT record
+            1. you can set a subdomain for user verifications here.
+   6. Subdomain
+      1. Suppose you hit the following domain: `http://abc.xyz.com`, the web browser will append a `.` at the end automatically behind the scene, means you request will go like `http://abc.xyz.com.`
+      2. The last `.` is the root domain, `.com` is the TLD, `xyz` is the domain and `abc` is the subdomain.
+      3. We can create multiple subdomains of a single domain
+   7. CNAME vs Alias
+      1. CNAME can't be used for root domain. It can only be used with subdomains
+      2. If you want to use a url say from s3 bucket at you root domain, which is hosting your static website, first rename the s3 bucket to the same name of your domain and the create a record with alias and select the bucket in it.
+      3. Alias can point to any aws resources and it also works on both root domain and subdomain level.
+      4. Try to use alias more and more instead of CNAME as alias is free but rest type of records are not free.
+      5.
