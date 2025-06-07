@@ -348,7 +348,7 @@
          1. It stands for Start Of Authority. It contains all the info about your domain.
       2. NS record
          1. It stands for Name Server
-         2. Any DNS request follows this path before getting resolved `Root level server --> TLD server --> Name server`
+         2. Any DNS request follows this path before getting resolved `www.example.com --> DNS Resolver --> Root level server --> TLD server --> Name server`
          3. Name Server aka Authoritive Name Server knows the server IP where the request needs to go.
          4. The name server has all the info related to the domain name
          5. Route 53 provides you 4 name servers by default for fault tolerance
@@ -373,4 +373,73 @@
       2. If you want to use a url say from s3 bucket at you root domain, which is hosting your static website, first rename the s3 bucket to the same name of your domain and the create a record with alias and select the bucket in it.
       3. Alias can point to any aws resources and it also works on both root domain and subdomain level.
       4. Try to use alias more and more instead of CNAME as alias is free but rest type of records are not free.
-      5.
+   8. TXT Record
+      1. Lets create a subdomain `acme.abc.com` and select the TXT as record type and set any value for it.
+      2. To access the value that you stored in the txt record, in terminal type `nslookup -type=TXT acme.abc.com`. It will return the string.
+      3. This is used to verify sometimes that the website belongs to you.
+      4. The usecase is when you want ssl certificate for your website, the certificate provider might ask you to create a acme subdomain and TXT record and set the value to a value provided by the certificate provider. It will run the command on its server and checks if the website really belongs to you or not. This is also called acme challenge.
+   9. Health checks
+      1. We can create health checks to monitor our EC2 instances (using their IPs) etc. We can check if our services are up and running or not.
+      2. We can also create health check which monitors other health checks on individual services
+   10. Routing policies
+       1. Simple Routing Policy
+          1. We can define mutiple IP addresses in it and the user will get all the defined IP addresses when run `nslookup`
+          2. User can now send request to any of the IP addresses
+          3. Simple routing policy does not provide health check option. Thus, even if some IP is down, the user will still get the defined IP list
+       2. Weighted Routing Policy
+          1. We can use this policy to partially rerouting some of the traffic to new service deployments say 10% of the traffic will be served new service and then we will increase the percentage once everthing is fine.
+          2. Here, we can divide the traffic to go to different IP addresses
+          3. For example, we can set the 60% of the traffic to go to an IP address and 40% to go to some other IP address whenever your domain is hit.
+          4. We can also provide health checks to the IPs. If any of the health check fails, it will redistribute the traffic to remaining healthy IPs
+       3. Geolocation Routing policy
+          1. We can divide the traffic based on the location from which it is comming
+          2. Suppose, you have applications returning resposne in 3 different languages like Hindi, English and Spanish. Each running on a separate server with an IP attached to it.
+          3. In this routing policy, you can divide the servers based on the location of the request like say from India, the request will be catered by Hindi server etc.
+             1. Hindi -- India
+             2. Spanish -- Spain
+             3. English -- Rest of the world
+          4. You need to set a default location as well while setting up this routing. The requests comming from rest of the world except India and Spain, from above example, will be served the default IP address.
+       4. Latency Based Routing
+          1. Suppose you have deployed your application in multiple AWS regions, Latency based routing makes sure that the user trying to reach your website will be routed to the server where the user will get minimum latency fetching the website.
+          2. It is different from geo based routing as here the user will route to the nearest server but in geo based, we explicitly tell where to connect based on the user's location
+       5. Failover routing policy
+          1. In it, we provide info about a primary and a secondary server.
+          2. Until the primary server is healthy, the secondary server will not get any requests. If the primary server becomes unhealthy, the secondary server starts getting requests and server them
+       6. Multivalue Answer routing policy
+          1. It is similar to simple routing where we can give multiple IP addresses and all of them will be returned to the requesting user.
+          2. The difference is we can put healthchecks for all the IP addresses, which was missing in simple routing, and only the healthy ones will be returned to the user.
+       7. IP based routing policy
+          1. Here, we first create a CIDR collection stating some IP CIDR like `18.234.0.0/16`
+          2. In IP based routing, we can set what IP to return when someone hit our website.
+          3. Like, we can set, say 1.1.1.1 to return if we get any hit from the IP in CIDR `18.234.0.0/16` and 2.2.2.2 from rest of the IPs
+          4. This can be used to mask the IP so hackers cannot know our exact IP. We can set the policy such that if we get hit from our own servers in a VPC, we will return actual IPs and when we get hit from outside world, we will return a masked IP say 1.1.1.1
+   11. Traffic Policy
+       1. This is a UI representation of our policies, servers, healthchecks etc.
+       2. We can use it to create routing infra for complex scenarios
+   12. DNS firewall
+       1. We can block some websites that our aws servers like EC2 instances try to access. Those websites may be malicious and you dont want to compromise your instances.
+       2. Thus we can block websites in our aws network
+       3. This is a part of VPC service
+       4. We can make our own list of blocked websites or we can use aws configured and maintained lists
+       5. You can attach the list to your VPC and after that all the servers under the VPC will not be able to access the websites mentioned in the block list.
+   13. Private Hosted zone
+       1. Companies has some websites which can be accessed only in company premises or company VPN
+       2. When EC2 instance makes request for a website, the DNS resolver, inside the VPC, first checks if the website is hosted in your private zone or not, then it check on the amazon DNS server and then goes to the outer world for resolving the address
+       3. Create Hosted zone
+          1. You can create a domain for your website that can be accessed only in your private hosted zone like `domain.internal.com`
+          2. You need to attach it to your VPC and create the hosted zone
+          3. Now, go to the `domain.internal.com` hosted zone and set a routing policy to it.
+       4. After the above setup, if you try to access the website from any server in that VPC, the DNS query will be resolved.
+       5. You can also use VPN and the DNS query will be resolved.
+       6. You can also attach the private hosted zone to multiple VPCs
+       7. Note: With the above config, the private hosted website' dns, hosted in a VPC, will only be resolved if it gets request from server that belongs to the VPC.
+   14. Hybrid DNS
+       1. Suppose a company has a on premise data center with a DNS resolver and aws infra with route 53 DNS resolver in the VPC.
+       2. You have a private hosted zone in aws with some internal company websites. you also have a site to site VPN enabled between AWS and your data center.
+       3. Now, you want to access the private websites from your data center.
+       4. Once you try to access the private website, the request will first go to your inhouse DNS resolver and then it will go to the outer world and since the website is privately hosted, and can only be resolved by the aws DNS resolver in that VPC, you will be not be able to resolve it.
+       5. You need to make some mechanism so that your data center can use the VPC's DNS resolver to resolve the IP address of the private website.
+       6. You can do this by creating DNS inbound endpoint in AWS that will allow outside traffic, from your data center, to query the DNS resolver of the private hosted zone.
+       7. After creating the inbound endpoint, you will get some IPs that can be used to access the VPC's DNS resolver.
+       8. Now, you can use the given IPs to point the DNS resolver.
+       9. Similarly, DNS outbound rules can be created to resolve a private website hosted in someother VPC that an EC2 instance is trying to access.
