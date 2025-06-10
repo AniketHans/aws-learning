@@ -443,3 +443,60 @@
        7. After creating the inbound endpoint, you will get some IPs that can be used to access the VPC's DNS resolver.
        8. Now, you can use the given IPs to point the DNS resolver.
        9. Similarly, DNS outbound rules can be created to resolve a private website hosted in someother VPC that an EC2 instance is trying to access.
+
+### Amazon RDS (Relational Database Service)
+
+1. RDS is a servive managed by AWS
+2. We can select any of the databases available in the market like mariadb, mysql, postgres etc while creating database in RDS
+3. After creating the database, you will get an endpoint and port number which can be used to access the database. Also, verify if the database port is enabled in the security group attached to the database
+4. The database is created in single region
+5. Read Replicas
+   1. These are created to perform read operations on the database so the reading load does not go to the master database which is doing both read and write operations
+   2. We can create read replica of the database by simple selecting the database and going to the actions
+   3. We can enable cross region replication as well while creating read replica
+   4. The read replicas are updated asynchronously with the new content in the master database.
+6. Multi AZ in RDS
+   1. If the master database is only in one availability zone and if that AZ gets down then you will not be able to do any operations on the database
+   2. Thus, while creating the database, we can config Multi AZ properties for making the database highly available
+   3. Standby instance
+      1. This property will create another replica of the master database and syncs data asynchronously with it
+      2. If the master database goes down, the replica will replace the master db instantly.
+7. RDS Proxy
+   1. Whenever a sql query is run after connecting your computer and RDS, the following operations are performed between application server(mysql server running on our PC) and database:
+      1. First, a connection is opened between your machine and RDS. OS opens a network socket between machine and RDS
+      2. Authentication is done of the user running the query
+      3. After authentication, query is run and the output is returned
+      4. Then the network socket gets closed and the connection between the machine and RDS also closes
+   2. Now, suppose the number of requests increases on your server and ultimatley increases database queries, then the CPU, memory utlization increases.
+   3. We can create a proxy between the server and database. The proxy will remain connected to database.
+   4. The proxy will maintain the connection with database and also will keep some connections open to be utilized by application server to query the database thus speedup the process
+   5. The proxy will have some connection open in connection pool and will reuse them to reduce the time of creating a new application
+   6. After creating the proxy, you need to use the proxy url to query the database from your application server.
+   7. You can also limit the database access to proxy by configuring the security group of the database. After this, no from outside can directly access the database
+8. Amazon Aurora DB
+   1. Aurora database engine are developed by aws itself
+   2. This database is 3x faster than postgres and 5x faster than mysql
+   3. It is compatible with both SQL and Postgres commands
+   4. For other databases like mysql, mariadb etc, we ourselves have to decide the memory to be allocated for the DB which can be extended by you have monitor it yourself.
+   5. Aurora database will start at 10 GB initially and keep on extending/scaling the storage automatically as soon as the space starts filling.
+   6. Whenever Aurora DB is created, 6 copies of the data inside will be created and stored in mutliple availability zones. If any of the AZ gets down, the data can be retrieved from other AZs.
+   7. As the data is already stored in multiple AZs, the creation of read replicas is faster as aws only has to config the read replica and the data can be fetched from the copy stored in that AZ
+   8. Maximum 16 read replicas can be created in different regions
+   9. It also supports read replica forwarding means if any write request comes to your read replica then that request will be forwarded to your master DB
+   10. Aurora DB is by default multi AZ enabled. Read replica can be promoted to primary or master DB incase of master DB failure
+   11. Here, master and read replica have a common shared storage volume to read and write data.
+   12. In Aurora, we have multiple endpoints above the reader and writer/master DB:
+       1. Writer endpoint
+          1. This endpoint will always point to the primary database. In case of failure of master/primary DB and promotion of any read replica as new master, the write endpoint will remain the same but it will start pointing the IP of the new master
+       2. Reader endpoint
+          1. This endpoint will point of the read replicas and also performs load balancing for faster read operations
+       3. Custom endpoints
+          1. We can create custom endpoint if we have mutiple readers and we want the custom endpoint to connect to some selected read replicas only.
+9. Cross region read replica
+   1. We can create database replica in an aws region other than the aws region of our primary database
+   2. That replica can be promoted to primary database if the region of our current primary database gets down
+   3. While creating a read replica of the primary database, you can select another region. This will create read replica in another region.
+   4. A subnet group is be deafault created when creating our first DB in RDS in a region. If you create read replica in another region, that resion might not have a subnet group created in it so first create a subnet group in another region and then create read replica in it
+10. Parameter group
+    1. Each type of database like mysql, mariadb etc have some parameters, like timeout etc configured in config file that defined behaviour of the database.
+    2. We can configure the paramters of our RDS DB by creating a custom parameter group and attaching it to the database instance
