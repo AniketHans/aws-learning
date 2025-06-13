@@ -500,3 +500,55 @@
 10. Parameter group
     1. Each type of database like mysql, mariadb etc have some parameters, like timeout etc configured in config file that defined behaviour of the database.
     2. We can configure the paramters of our RDS DB by creating a custom parameter group and attaching it to the database instance
+
+### Aws DynamoDB
+
+1. This is a serverless service. Here, we dont have to create server. We just create table and we have to pay for read and write operations that we do on the table
+2. The created table will be highly available and fault tolerant by default by the aws
+3. There is limit to the size of a item stored in dynamo db table
+4. We have to provide partition key to the table. This is a part of the primary key. This mainly gives info about the partition/block in hardisk where our item is stored. We have any property as partition key, say user_id
+5. The primary key has another part, called sort key. We can make any attribute as sort key, say city.
+6. Thus, primary key = Partition key + sort key
+7. Sort key is optional and can only be defined at the time of table creation.
+8. Scan table will got through all the records in the table and return filtered records. This is slow
+9. Query needs info about the partition key value to know the location of the object. And then it can fetch the filtered record. Thus, this is faster than scan.
+10. Read capacity unit (RCU) and Write Capacity Unit (WCU)
+    1. This value is calculated by defining Average item size in out table, Number of items we will be reading per second and Read consistency.
+    2. For example, let say avg item size is 4 KB and items read per sec is 10, so RCU value will come as 5
+    3. The write consistency is calculated by defining Average item size in out table, Number of items we will be writing per second and Write consistency.
+11. In DynamoDB, after storing the item in table, the item gets stored in multiple nodes across multiple AZs
+12. Read consistency:
+    1. Eventual Consistent
+       1. After inputing item, the aws will store it in any one of the DynamoDB nodes and acknowledges the user. Then, it replicates the item in multiple nodes in multiple AZs behind the scene.
+       2. It the node fails, before initiating the replication, there could be potential data loss.
+    2. Strongly consistent
+       1. After inputing the data, aws will first store into multiple nodes in different AZs and then acknowledges the user.
+       2. This take some time and need more RCUs
+    3. Transactional
+       1. After inputing the data, aws will store it to multiple nodes and if any one of the node fails in between, the whole writting transaction will abort
+13. Local secondary index (LSI):
+    1. This is an index created on an attribute of items stored in DynamoDb table for faster querying items in a partition
+    2. LSI can be created only at the time of creating the table.
+    3. The data retrieval becomes a lot faster
+    4. It uses partition key for fast searching.
+    5. This gives an extra layer of filtering the data
+14. Global Secondary index (GSI)
+    1. This can be created during and after table creation
+    2. Here, we can select any attribute of the item as partition key and sort key.
+    3. Basically, a new replica of our table is created with the newly defined partition key and sort key and then we can query data on the replica fastly
+    4. Since, a replica is created, aws will charge for GSI
+    5. New data will first be inserted in original table and then in the replica created for GSI
+    6. We can create multiple GSIs
+15. Point in time recovery
+    1. This property can be enabled on a table.
+    2. It allows to keep backup of your dynamodb table for each second.
+    3. We can rollback to any time if something wrong happens with our dynamo db data
+    4. When we restore data from any point of time, we have to do it in new table. AWS will not restore data in our original table.
+16. Backups
+    1. We can also create periodic backups manually
+17. Global tables
+    1. We can create replicas of our table in mutiple regions
+    2. The created replicas will always be in sync
+    3. We can read or write data on any replica and the data will be synced in all regions
+    4. The replication is very faster
+18.
