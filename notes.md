@@ -551,4 +551,25 @@
     2. The created replicas will always be in sync
     3. We can read or write data on any replica and the data will be synced in all regions
     4. The replication is very faster
-18.
+
+### Simple Email Service
+
+1. If you have a blogging website, SES can be used to send mails to your subscribers telling them about your new blog launch, this type of email is called Marketing Email, or if you have paid courses on your website and someone buys a course, then you have to send the person invoice of the purchase. This type of mail is called Transactional email and these mails should be prioritized.
+2. For using the SES, you need to add identities in AWS SES
+3. You can use your personal email or your website's domain related emails to send the mails to users.
+4. For domain related mail, create an identity with your website domain name and after that the console will show you some entries with property names as type, key and value. The entries are cname entries.
+5. If you are using route53 then the above entries will automatically be added and if you are using some other domain registrar then you need to create those entries manually. After this, AWS SES will verify domain using the enrties and ultimately it will verify your domain identity.
+6. By default, the SES runs in sandbox env and this is one of the reason the mail will go to spam folder. You need to ask for production env access from AWS for SES and after that the mails will be considered legit.
+7. After getting the production access, we need to maintain our reputation in SES. The reputation depends on Bounce rate and Complaint rate of our mail which we can see in dashboard. If both rates are less, if means our reputation is good and mail services like gmail, yahoo etc will try to keep our mails in inbox rather than spam.
+8. Through suppression list, you can see which emails got bounced back and which emails raised complaint against your mails. You need to remove those from your database, so your bounce rate and complaint rates dont go high.
+9. The mails you are sending through SES should not go to the spam folder. For this we have to perform the following things:
+   1. First, after creating the identity, you need to add the cname entries wherever your domain is present.
+   2. Ask for production env access
+   3. Make sure your mails' bounce rate and complaint rates are less.
+
+### Simple Notification Service
+
+1. This is used to send notifications to users. The notifications can be of the form email, sms etc
+2. SNS has pub-sub concept where we have a topic and publisher publishes data regarding the topic and subscriber consumes the message.
+3. We first need to create a topic in AWS SNS and then we need to add subscribers to the topic. The subcribers can be added using their email, phone number etc. Then we can publish any message to the subscribers.
+4. We can alter the delivery policies for the message to the subscribers to handle the scenarios like subcribers mobile switch off, email full etc.
