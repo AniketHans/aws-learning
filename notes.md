@@ -573,3 +573,43 @@
 2. SNS has pub-sub concept where we have a topic and publisher publishes data regarding the topic and subscriber consumes the message.
 3. We first need to create a topic in AWS SNS and then we need to add subscribers to the topic. The subcribers can be added using their email, phone number etc. Then we can publish any message to the subscribers.
 4. We can alter the delivery policies for the message to the subscribers to handle the scenarios like subcribers mobile switch off, email full etc.
+
+### Cloudwatch
+
+1. It is a monitoring service
+2. It is used to monitor the health of your aws services and in case of any issue, it will trigger an alert using the sns service
+3. Each aws service, that you have used somewhere in your account, has an automatic dashboard created where you can see the health of resources hosted on that service.
+4. Namespaces:
+
+   1. In Amazon CloudWatch, a namespace is a container for CloudWatch metrics. It groups related metrics together.  
+      In short:  
+      Namespace = Category or grouping for metrics  
+      Example:
+
+      AWS/EC2 → metrics for EC2 instances
+
+      AWS/RDS → metrics for RDS databases
+
+      Custom/MyApp → custom app metrics you define
+
+      Namespaces help you organize and filter metrics for specific services or applications.
+
+   2. By default, cloudwatch monitors each service in intervals of 5 mins. If you want to reduce this time, then y9ou can enable detailed moinitoring for your service
+
+5. Triggering alerts/alarms
+   1. You can create alerts/alarms on any metrices like cpu utilization, memory utilization etc.
+   2. The alerts can be used to notify people using sns or we can run any lambda function, reboot the EC2 instance, auto scaling etc
+   3. Alarms has 3 states:
+      1. In alarm : This is the state where the alarm condition is met in the metrics
+      2. Ok: This is when everything is fine
+      3. Insufficient data: This is when we have insufficient data to analys if the system is in alarm or not like system reboot.
+   4. In case of in alarm state, you can send custom notification to SNS topic
+6. Composite alarm
+   1. When 2 or more alarms are combined together using OR/AND to create a single alarm, AWS calls it an composite alarm
+7. Some metrices are not by default present in cloudwatch like memory utilization. By default, cloudwatch has only those metrices that the hyperviser of your instance is sharing with it.
+8. By default, cloudwatch can't see inside our machine to gain info about metrices
+9. All monitoring tools like cloudwatch, has some agents that we can install in our system/machine. The agent will look into our machine, after installation, and collect important metrics data for our analysis.
+10. For sending your application logs to cloudwatch, you need to give path the log file to the cloudwatch agent. You need to give a name to the log group and a name, ideally instance id, to the log stream. At each server of the application , the file name shall be same as well as the log group name. Log stream name should be unique for each server. Then in cloudwatch, you can see the logs under the log group and if wanted to see logs of a particular server, go to the log stream set for the server.
+11. Log insights:
+    1. If your logs are well structured, say in json format, you can run queries on them to find something in the logs
+12. Using `metrics filter`, you can monitor the logs of your application and trigger alerts based on some events.
