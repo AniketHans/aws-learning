@@ -613,3 +613,40 @@
 11. Log insights:
     1. If your logs are well structured, say in json format, you can run queries on them to find something in the logs
 12. Using `metrics filter`, you can monitor the logs of your application and trigger alerts based on some events.
+
+### AWS lambda
+
+1. It is a compute service
+2. It is a serverless service means we dont have to manage the server for our application, AWS behind the scene will manage that for us
+3. Lambdas are event driven like if you want to execute some code if some object is entered inserted into your S3 bucket, then you can execute the code using lambda.
+4. Lambda will itself take care of optimization and scalability
+5. creating lambda:
+   1. While creating lambda, a new default IAM role gets attached to it. But if you want the lambda to access other AWS services, then you need to add those policies to the IAM role. You can also attach an existing role to lambda.
+   2. Lambda's logs are stored in cloudwatch by default
+6. We have `event` parameter in lambda handler. We can use it to recieve inputs from users like we can send `{val1: 10, val2: 5}` and it will be recieved as it is in `event` param. In short, event expects an json/dictionary object
+7. Function url
+   1. We can enable function url for our lambda.
+   2. After enabling, we will get a url which we can use to execute our lambda function
+   3. If we hit it through webbrowser, the `event` param by default get the info about the http request type, path, browser details etc.
+8. **The event param can be considered as request object.**
+9. The event object will have different values for different events
+10. Lambda Hot start vs Cold Start:
+    1. Whenever a lambda is triggered through some event, AWS, behind the scene, creates an execution environment for it with some config and then run the lambda into it. This process takes time and adds up in our response time.
+    2. If another event/request is triggered for lambda execution and the gap between the new request and old one is not huge, then AWS will not create a new execution env for this new request and executes the lambda with event in the old execution env.
+    3. The first time creation of exec. env and running of lambda into it is refered to as Cold start of the lambda. Cold start adds latency in response as the execution env creation takes some time.
+    4. When the execution env is already present for the lambda and only AWS has to run the lambda for new env, this case is called Hot Start of lambda.
+    5. Note: If the time between 2 requests/events is huge, then AWS will close the previous execution env and creates a new execution env for new request/event.
+    6. Thus, you should avoid creating connections like database connections etc in lambda handler function. Better create database connection in global variable and use it lambda handler. The database connection will be created at the time of cold start once. Due to hot start, the database connection will be preserved for further requests:
+    ```python
+      dbConnection = None
+      def lambda_handler(event):
+            global dbConnection
+            if not dbConnection:
+               dbConnection = createDbConnection()
+               ### use the DB connection
+            else:
+               ### use the DB connection
+    ```
+    7. In case of hot start, the global variables data is preserved due to the use of previous execution env.
+11. AWS did not specify the time after which the current execution env is deleted and again cold start of lambda will de in case of new request/event.
+12.
