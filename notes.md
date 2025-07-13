@@ -649,4 +649,27 @@
     ```
     7. In case of hot start, the global variables data is preserved due to the use of previous execution env.
 11. AWS did not specify the time after which the current execution env is deleted and again cold start of lambda will de in case of new request/event.
-12.
+12. We can also set env variables in lambda config.
+13. Lambda configurations:
+    1. Memory:
+       1. This is the memory used by lambda function on execution. The number of CPU cores attached to the lambda function is directly proportional to the memory attached to the lambda function.
+    2. Emphemeral storage:
+       1. Suppose your lambda function needs to download a file during its execution, then the file will be stored in temp directory of the lambda function.
+       2. Emphemeral storage defines the maximum size of the temp folder.
+    3. Timeout:
+       1. The maximum time for which the lambda function will execute. It will throw error if the lambda function took more time that Timeout
+14. Context object in lambda
+    1. It contains info about the infra related to the lambda function like function name, memory allocated to it, version
+15. Synchronous and Asynchronous invocations
+    1. In synchronous invocation of lambda function, you trigger an event/request and wait for the lambda function to complete its execution and return a response.
+    2. In asynchronous invocation, you trigger an event/request and it will get strored in event queue for execution, once the event/request is picked from the event queue, the lambda function gets triggered for that event and performs the desired actions. If you triggered lambda function through async inv through cli, you will get 202 status immediately acknowledging that your request is received and added in event queue.
+    3. Mostly, aws services like S3 etc use asynchronous invocations
+    4. In case of any bug in our lambda code for async invocation, the lambda function is retriggered 2 more times for the same event by default by AWS. You can change the value by going to Async invocations tab in lambda configurations
+    5. Maximum age of event:
+       1. It is the maximum time for which the asynchronously invocated event will remain alive in the event queue
+    6. Dead letter queue:
+       1. This is the acknowledgement to the user in case all the attempts of running the event fails, may be due to error in lambda code
+16. Add triggers:
+    1. Here, we can configure a service like S3 etc which will trigger the lambda.
+17. You can change the lambda_handler file name and function name by changing those in lambda runtime config.
+18.
