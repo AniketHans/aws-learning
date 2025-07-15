@@ -671,5 +671,35 @@
        1. This is the acknowledgement to the user in case all the attempts of running the event fails, may be due to error in lambda code
 16. Add triggers:
     1. Here, we can configure a service like S3 etc which will trigger the lambda.
-17. You can change the lambda_handler file name and function name by changing those in lambda runtime config.
-18.
+17. You can change the lambda_handler file name and function name by changing those in lambda runtime config. It means if you want lambda to execute the main() in you app file, whenever it is executed, then change the lambda runtime to `app.main`. Dont forget to keep the app file with main function in root directory of your lambda function.
+18. For writing lambda code, you can do it in following 3 ways:
+    1. Writing code directly in lambda ide
+    2. Creating a zip file with main file containing the lambda handler function in the root directory and uploading it directly to lambda
+    3. Upload the above zip to S3 and then importing it in lambda
+19. For deploying code with external dependecies, either bundle the dependencies in zip and upload the code directly or you can use layers
+20. Layers are like file system put in the lambda execution env. You can put your libraries and modules in this file system so you program can import those libraries and modules. This will help in keeping the root directory lambda code clean.
+21. Same layer can be used by multiple lambdas
+22. The folder structure for the layer zip can be seen from the following link:
+    https://docs.aws.amazon.com/lambda/latest/dg/packaging-layers.html
+23. You can add multiple layers to your lambda function
+24. We can attach up to 5 layers to a single Lambda function but size of each must not be exceed 250MB
+25. We can have multiple versions of the lambda function. By default, `latest` version name is attched to the lambda present in IDE. But we can create a version, say v1, of the lambda before changing the code of latest lambda. The config of version are almost immutable
+26. `latest` lambda version is mutable, means we can change the config of the latest lambda function any time.
+27. Alias in AWS Lambda:
+    1. An alias is like a pointer to a specific Lambda version. It lets you use a fixed name (e.g., Prod) instead of version numbers. Helpful for deployment and testing without changing code.
+28. Weighted Alias:
+
+    1. It allows traffic splitting between two versions. Example: Prod alias sends 90% traffic to version 1 and 10% to version 2.Useful for canary deployments or gradual rollouts.
+
+29. Lambda Execution roles:
+    1. We define the AWS resources that our lambda can access oe execute something in them
+    2. This is similar to IAM role
+30. Lambda Resource based policy statements:
+    1. All the AWS resource which can trigger our lambda are defined under this.
+    2. Like if we configured ALB to trigger our lambda, then we will see ALB under the resource based policy.
+31. VPC in lambda:
+    1. By default, all the lambdas are attached to a VPC managed by AWS
+    2. But you can also move the lambda to your custom VPC and attach it your public subnet.
+    3. Note: even if you public subnet has internet connectivity, your lambda will not get the internet access. It means the lambda will have internet access until unless it is present in AWS' managed VPC.
+    4. For providing internet access to your lambda through your custom VPC, attach it to a private subnet under your vpc and attach a NAT gateway to your private subnet for all outside traffic. This will allow the lambda to return the result to the outer world.
+    5.
