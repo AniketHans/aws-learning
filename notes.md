@@ -702,4 +702,29 @@
     2. But you can also move the lambda to your custom VPC and attach it your public subnet.
     3. Note: even if you public subnet has internet connectivity, your lambda will not get the internet access. It means the lambda will have internet access until unless it is present in AWS' managed VPC.
     4. For providing internet access to your lambda through your custom VPC, attach it to a private subnet under your vpc and attach a NAT gateway to your private subnet for all outside traffic. This will allow the lambda to return the result to the outer world.
-    5.
+32. If you have database in RDS which has only private access enabled and you want to connect it to your RDS database, then you need to config the RDS related settings in Lambda config
+33. Reserved Concurreny and Provisioned concurrency:
+    1. Whenever our lambda function is invoked first time, AWS initalizes an execution env for it and then run the lambda code in the execution env.
+    2. If another lambda invocation happens after the previous execution completes then AWS runs the lambda again with new invocation in the previous lambda's execution env.  
+       ![Linear lambda exec](./resources/images/linear-lambda-exec.png)
+    3. But, if another lambda invocation happens while the previous execution is still running then AWS initializes a new execution env and run the new invocation in it.  
+       ![Concurrent lambda exec](./resources/images/concurrent-lambda-exec.png)
+    4. Thus, a lambda can have multiple execution envs created for concurrent execution of requests.  
+       ![Concurrent lambda exec with lambda exec](./resources/images/conc-exec-with-time.png)
+    5. Each aws account has a limit of number of execution envs that can be active at the same time. Suppose that limit is 50, so you can have 50 lambda execution env active at the same time based on the number of requests
+    6. Suppose, you have 3 lambda functions, say l1, l2 and l3, in your aws account and 50 is the limit of number of parallel execution envs, it might happen that so many requests come for l1 that all the limit of 50 execution env is exhausted by l1 only. In this case, if any request comes for l2 or l3, it will return error for rate exceeded as all the 50 execution envs are in use by l1.
+    7. To solve this, you can reserve some minimum limit of execution envs for each lambdas. It means suppose you reserved 10 for each l2 and l3. So in this case, l1 can have maximum of 30 (50-10-10) parallel execution envs. Here, in this case, 20 is the reserved concurrency and 30 are unreserved. Total aws lambda concurrency is 50 here.
+    8. You can see your aws accounts lambda concurrency in lambda dashboard.
+    9. For reserving lambda concurrency for a particular lambda, you have configure it in concurrency settings of lambda config. Note: you can reserve some lambda concurrency out of the remaining unreserved concurrency only.
+34. Provisioned concurrency:
+    1. Whenever lambda function is executed in a new execution env, the initialization of the execution env takes time which adds up to the response time of the lambda
+    2. We can configure AWS lambda to already initialize some, say 10 or 12, execution envs for a particular lambda . So, in case, any request comes, AWS need not initialize the execution env and use the any of the already initialized execution env to run the lambda. These already initialized lambdas are called Warm lambdas
+    3. If you put say 12 warmed up lambdas and say 13 requests comes parallely for invocation then for 12 requests already warmed up lambda execution envs can be used and for 13th request aws will initialize a new execution env.
+35. Lambda Destinations:
+    1. One lambda output can be used in the following ways:
+       1. Invoke another lambda with its response
+       2. Send some notifaction to AWS SNS
+       3. etc.
+    2. The above usages of lambda output to another services can be performed by setting the another services as lambda destinations
+    3. This thing can only work if the lambda is invoked asynchronously
+    4. If you are triggering another lambda with current lambda's resposne then you will get the response as payload in `event` parameter of the other lambda
