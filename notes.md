@@ -728,3 +728,21 @@
     2. The above usages of lambda output to another services can be performed by setting the another services as lambda destinations
     3. This thing can only work if the lambda is invoked asynchronously
     4. If you are triggering another lambda with current lambda's resposne then you will get the response as payload in `event` parameter of the other lambda
+
+### Api gateway
+
+1. Purpose of APi gateway:
+   1. We have monolith architectures where the whole backend code for your application lies on the same server. Lets take an example of any ecommerce app which follows monolith architecture means all requests, say admin requests, inventory management request, user login etc will go to the same server running all of these under single repo.
+      1. We can easily put authentication, authorization etc in the same code as whole application has one single code and we just have to implement the authorization, authentication in a single code.
+   2. In case of microservices architecture, we divided the code into multiple repos solving a particular purpose. Like in case of ecommerce application, we created separate services for inventory management, product info, admin login, user login etc.
+      1. Now, since there are multiple applications which exposes apis and we need only authenticated/authorized user to call the apis. For this, we have to implement the authorization, authentication etc in all the services separately.  
+         ![Microsevices without api gateway](./resources/images/microservices-without-api-gateway.png)
+      2. Also, since we have multiple services then the frontend needs to incorporate multiple api routes belonging to the service so a particular type of request reach the correct application server.
+   3. Api gateway:
+      1. All the common usecases like authentication, authorization etc can be put in api gateway and all the microservices are connected to the api gateway. Common things like authentication etc are done at the api gateway level.
+      2. User/ frontend will send the request to api gateway only, not the service directly. Based on the path, apigateway will reroute the request to desired service.  
+         ![Microsevices with api gateway](./resources/images/microservices-with-api-gateway.png)
+      3. We can enable caching at the api gateway level
+      4. We can also the alter the request and response at the api gateway level.
+      5. Api gateway also performs the role of a load balancer.
+2. AWS api gateway is managed by aws itself.
