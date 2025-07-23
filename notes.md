@@ -746,3 +746,16 @@
       4. We can also the alter the request and response at the api gateway level.
       5. Api gateway also performs the role of a load balancer.
 2. AWS api gateway is managed by aws itself.
+3. While creating api gateway, we have the follwoing options:
+   1. Http api (This is the low cost one. We can't enable much features here.)
+   2. Websocket api
+   3. Rest api (This api can be accessed publically. It has more features and configurations than Http api.)
+   4. Rest api private (This api can only be accessed in private vpc)
+4. The request and response comming on the Rest api follows this path:
+   1. ![Api gateway rest request path](./resources/images/api-gateway-rest-path.png)
+   2. Here, the after the client sends the request to api gateway.
+   3. In method request, we can implement the rate limiting, authentication and authorization etc. Means we can validate the client request.
+   4. In integration request, if we want to process the client request like converting the json request to xml format, or adding new property to the request body etc, we do it here
+   5. After this, the request is formwarded to backend either lambda or http server which is implemented in the api gateway config
+   6. Then, after the backend returns the response, in integration resposne stage, we can process or alter the response.
+5.
