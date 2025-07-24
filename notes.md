@@ -751,11 +751,20 @@
    2. Websocket api
    3. Rest api (This api can be accessed publically. It has more features and configurations than Http api.)
    4. Rest api private (This api can only be accessed in private vpc)
-4. The request and response comming on the Rest api follows this path:
+4. After creating api gateway, you need to create resources in api gateway. These resources are paths like `/user`, `/product` etc. In each resource you need to add method like GET, POST, PUT etc
+5. The request and response comming on the Rest api follows this path:
    1. ![Api gateway rest request path](./resources/images/api-gateway-rest-path.png)
    2. Here, the after the client sends the request to api gateway.
    3. In method request, we can implement the rate limiting, authentication and authorization etc. Means we can validate the client request.
    4. In integration request, if we want to process the client request like converting the json request to xml format, or adding new property to the request body etc, we do it here
    5. After this, the request is formwarded to backend either lambda or http server which is implemented in the api gateway config
    6. Then, after the backend returns the response, in integration resposne stage, we can process or alter the response.
-5.
+6. The path, query params and req headers can be found in event object of the lambda function
+7. In Method Request, we can enable vaidations on query params, headers and body (through models). These validations act like a firewall on client requests and only allow those requests which pass all the validations
+8. In Integration Request, we can modify the client request like we can change an existing query param key or add a new key. Similarly, we can change the value of header or add a new header etc.
+   1. Http proxy integration does not allow us to modify the request so if it is disabled then you can modify the body as well in integration request
+   2. Not able to modify the existing request means, if you want to change any query parameter, header or body element inplace, then it is not possible. It will just simply add the modification in existing request.
+   3. For example, if you are getting param1 ,`/user?param1=15$param3=90`, as query param and you want to modify the key param1 to param2. If http proxy integration is enabled, it will just add another param, param2, with same value as param1. Thus, the server will receive 3 query params param1, param2 and param3
+   4. But if http proxy integration is disabled then it will just overwrite all the query params and send only param2 to the server.
+   5. Thus, we can only add things in request if http proxy integration is enabled.
+9.
