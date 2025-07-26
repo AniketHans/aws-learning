@@ -767,4 +767,29 @@
    3. For example, if you are getting param1 ,`/user?param1=15$param3=90`, as query param and you want to modify the key param1 to param2. If http proxy integration is enabled, it will just add another param, param2, with same value as param1. Thus, the server will receive 3 query params param1, param2 and param3
    4. But if http proxy integration is disabled then it will just overwrite all the query params and send only param2 to the server.
    5. Thus, we can only add things in request if http proxy integration is enabled.
-9.
+9. Integration response
+    1. It is used to modify the response comming from lambda, http server etc.
+10. Method Response:
+    1. If we want to append a custom header in the response, then we first have to define it in Method response and then we have to assign it value in Integration response.
+11. Enabling authentication and authorization in api gateway.   
+      1. We can have the following ways for enabling authentication in api gateway
+         1. IAM role
+            1. This will allow any user or aws service that has the IAM role, attached to it, with access to that hit that particular api in api gateway
+            2. This is one of the most secure ways of authenticating user or service
+            3. This is mostly used when a AWS service needs to hit any api which is behind the api gateway
+            4. We cannot enable rate limiting and throtling in this authentication method.
+            5. This is mostly used for internal communication between aws services and api gateway.
+            6. This is also useful with aws sdk
+         2. API key
+            1. You need to create api keys from aws and send the api key in request for authentication
+            2. After creating the api key, you need to create a usage plan for this api key and in usage plan, we need to associate a api gateway that will be accessed using the api key
+            3. Add header `x-api-key` in request with api key value for successful authentication
+         3. Custom Authorizer
+            1. If you have a custom logic to authenticate a user by a token it sends in the request
+            2. For this, we will create a custom lambda function which has the authorization/token validation logic in it.
+            3. Any request comming to api gateway, will first be send to the custom auth lambda and then after successful validation from the auth lambda, it will be forwarded further.
+            4. After creating the authorizer lambda, create an autorizer in api gateway by attaching the auth lambda to it.
+            5. The auth lambda needs to return either an ALLOW policy or DENY policy for allowing or denying the requests respectively. You can look for the AWS document for format of these policies.
+            6. You will get the arn of the api gateway resource and the token value in event variable of the auth lambda.
+
+
